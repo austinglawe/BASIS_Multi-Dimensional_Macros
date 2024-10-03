@@ -1,0 +1,12 @@
+Sub AZGives_AR_Part1()
+    MsgBox ("I'm sorry, but this converter is not yet in this file. Please select a different converter.")
+End Sub
+
+Sub AZGives_AR_Part2()
+
+End Sub
+
+Sub AZGives_SF()
+    MsgBox ("I'm sorry, but this converter is not yet in this file. Please select a different converter.")
+End Sub
+
