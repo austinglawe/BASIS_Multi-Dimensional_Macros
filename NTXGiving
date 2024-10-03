@@ -1,0 +1,201 @@
+Sub NTXGiving_AR_Part1()
+    MsgBox ("I'm sorry, but this converter is not yet in this file. Please select a different converter.")
+End Sub
+Sub NTXGiving_AR_Part2()
+
+End Sub
+Sub NTXGiving_SF()
+    Dim FilePath As Variant
+    Dim DisbursementID As String
+    Dim wsReport As Worksheet
+    Dim wbTemp As Workbook
+    Dim wsTemp As Worksheet
+    Dim ReportLastRow As Long
+    Dim NewFileName As String
+    Dim OldFolderPath As String
+    Dim LastSeparatorIndex As Integer
+    Dim CurrentDateTime As String
+    Dim NewFolderPath As String
+    Dim newWB As Workbook
+    Dim wsSFImport As Worksheet
+    Dim SFImportLastRow As Long
+    
+    
+    ' Step 1: Ask user if they are sure they want to go to the 'SF' NTX Giving Converter
+        UserResponse = MsgBox("Are you sure you want to start the 'SF' NTX Giving Converter?", vbYesNo + vbQuestion, "Confirmation to start the 'SF' NTX Giving Converter")
+
+
+    ' Step 2: Check the user's response - If they choose no, end the sub, otherwise continue to the next steps.
+        If UserResponse = vbNo Then
+            Exit Sub
+        End If
+        
+        
+    ' Step 3: Prompt the user to select a file
+        FilePath = Application.GetOpenFilename("CSV Files (*.csv), *.csv", , "Select a file", , False)
+        If FilePath = False Then
+            MsgBox "No File Selected. Please find the file and try again."
+            Exit Sub
+        End If
+    
+    
+    ' Steps 4-6: Ask user for the Disbursement ID
+        ' Step 4: Ask the user for the Disbursement ID
+            DisbursementID = InputBox("Thank you for selecting a file. Please enter the Disbursement ID:", "Enter Disbursement ID")
+        
+        ' Step 5: Check if the user-given Disbursement ID is at least 5 characters long, if it is, proceed to the next steps, if not, it will ask again.
+            If DisbursementID = Cancel Then
+                MsgBox "Please find the Disbursement ID and try again."
+                Exit Sub
+            Else:
+                If Len(DisbursementID) < 5 Then
+                DisbursementID = InputBox("Please enter in the Disbursement ID to proceed. Disbursement ID:", "Enter Disbursement ID")
+                End If
+            End If
+            
+        ' Step 6: If it still isn't at least 5 characters, exit the sub, otherwise proceed to the next steps.
+            If Len(DisbursementID) < 5 Then
+                MsgBox "Please find the Disbursement ID and try again."
+                Exit Sub
+            End If
+    
+    
+    ' Step 7: Delete the Selection Page and Create the Reset Page
+        Reset.Create_Reset_Worksheet
+    
+    
+    ' Step 8: Create a variable for the Reset Worksheet
+        Set wsReset = ThisWorkbook.Worksheets("COMPLETE RESET")
+        
+        
+    ' Step 9: Protect the Reset Worksheet
+        wsReset.Protect
+        
+        
+    ' Step 10: Create a new worksheet called "NTX Giving Report" and use the variable wsReport
+        Set wsReport = ThisWorkbook.Worksheets.Add(After:=wsReset)
+        wsReport.Name = "NTX Giving Report"
+    
+    
+    ' Step 11: Place the file given by the user into the "NTX Giving Report" [wsReport] worksheet.
+        Set wbTemp = Workbooks.Open(FilePath)
+        Set wsTemp = wbTemp.Sheets(1)
+        
+        
+    ' Step 12: Copy the data from wsTemp to wsReport
+        wsTemp.UsedRange.Copy Destination:=wsReport.Range("A1")
+        wbTemp.Close SaveChanges:=False
+        
+        
+    ' Steps 13-17: Add a column in front of column A of the "NTX Giving Report" [wsReport] worksheet, put the Disbursement ID in this column, and fill down.
+        ' Step 13: Add a column in front of Column A
+            wsReport.Columns(1).Insert Shift:=xlToRight
+        
+        ' Step 14: Add the column header "Disbursement ID"
+            wsReport.Range("A1").value = "Disbursement ID"
+        
+        ' Step 15: Add the Disbursement ID to A2
+            wsReport.Range("A2").value = DisbursementID
+        
+        ' Step 16: Find the last row of column B, to know how many rows to fill down put the row number in a variable called 'ReportLastRow'
+            ReportLastRow = wsReport.Cells(wsReport.Rows.Count, "B").End(xlUp).Row
+        
+        ' Step 17: Fill Down
+            If ReportLastRow > 2 Then
+                wsReport.Range("A2:A" & ReportLastRow).FillDown
+            End If
+            
+    ' Step 18: AutoFit columns
+        wsReport.Range("A:BE").Columns.AutoFit
+        
+              
+    ' Step 19: Formulate a file name to Rename the current file name
+        NewFileName = "NTX Giving - " & Format(wsReport.Range("AJ2").value, "YYYY.MM.DD") & " (" & DisbursementID & ")"
+    
+    
+    ' Steps 20-23: Figure out the Folder Path of the previous file used (FilePath). Create a new folder path. The copy the current worksheet into the folder as a CSV file using the 'NewFileName' variable to name the file.
+        ' Step 20: Find the last "\" or "/" character in the FilePath to determine the folder path
+            LastSeparatorIndex = InStrRev(FilePath, Application.PathSeparator)
+        
+        ' Step 21: Extract the Foler Path from the FilePath
+            If LastSeparatorIndex > 0 Then
+                OldFolderPath = Left(FilePath, LastSeparatorIndex)
+            End If
+        
+        ' Step 22: Make a new folder in the OldFolderPath with the extension "\NTX Giving Reports as of " and the current date and time in this format (YYYY.MM.DD-HH.MM.SS)
+            If OldFolderPath <> "" Then
+                ' First: Find the Current date and time and put it into an variable
+                    CurrentDateTime = Format(Now, "YYYY.MM.DD-HH.MM.SS")
+                ' Second: Create the NewFolderPath variable with the appropriate naming
+                    NewFolderPath = OldFolderPath & "NTX Giving Report for AR Team as of " & CurrentDateTime
+                ' Third: Create the Folder
+                    MkDir NewFolderPath
+            End If
+
+        ' Step 23: Copy the worksheet ("NTX Giving Report") [wsReport] as a CSV file and use the NewFileName to save it in the NewFolderPath
+            ' Copy the worksheet into a new workbook
+                Set newWB = Workbooks.Add
+                wsReport.Copy Before:=newWB.Sheets(1)
+            
+            ' Save the new workbook as a CSV file
+                newWB.SaveAs Filename:=NewFolderPath & "\" & NewFileName & ".csv", FileFormat:=xlCSV, CreateBackup:=False
+            
+            ' Close the new workbook without saving changes
+                newWB.Close SaveChanges:=False
+
+
+    ' Step 24: Create a New Worksheet called "Salesforce Import File"
+        Set wsSFImport = ThisWorkbook.Worksheets.Add(After:=wsReport)
+        wsSFImport.Name = "Salesforce Import File"
+            
+    ' Steps 25-: Populate the "Salesforce Import File" worksheet
+        ' Step 25: Create the column headers
+            wsSFImport.Range("A1").value = "Transaction ID"
+            wsSFImport.Range("B1").value = "Disbursement ID"
+            wsSFImport.Range("C1").value = "Transaction Date"
+            wsSFImport.Range("D1").value = "Disbursement Date"
+            wsSFImport.Range("E1").value = "Donor First Name"
+            wsSFImport.Range("F1").value = "Donor Last Name"
+            wsSFImport.Range("G1").value = "Donor Email"
+            wsSFImport.Range("H1").value = "Gross Amount"
+            wsSFImport.Range("I1").value = "School"
+            wsSFImport.Range("J1").value = "Dedication Name (Description)"
+            wsSFImport.Range("K1").value = "Donation Site"
+        
+        ' Step 26: Create the formulas to pull the data into the "Salesforce Import File" worksheet
+            wsSFImport.Range("A2").Formula2 = "=FILTER('NTX Giving Report'!B:B,('NTX Giving Report'!B:B<>"""")*('NTX Giving Report'!B:B<>""Tracking #""))"
+            wsSFImport.Range("B2").Formula = "=XLOOKUP($A2,'NTX Giving Report'!$B:$B,'NTX Giving Report'!A:A)"
+            wsSFImport.Range("C2").Formula = "=TEXT(XLOOKUP($A2,'NTX Giving Report'!$B:$B,'NTX Giving Report'!D:D),""MM/DD/YYYY"")"
+            wsSFImport.Range("D2").Formula = "=TEXT(XLOOKUP($A2,'NTX Giving Report'!$B:$B,'NTX Giving Report'!AJ:AJ),""MM/DD/YYYY"")"
+            wsSFImport.Range("E2").Formula = "=XLOOKUP($A2,'NTX Giving Report'!$B:$B,'NTX Giving Report'!F:F)"
+            wsSFImport.Range("F2").Formula = "=XLOOKUP($A2,'NTX Giving Report'!$B:$B,'NTX Giving Report'!G:G)"
+            wsSFImport.Range("G2").Formula = "=IF(XLOOKUP($A2,'NTX Giving Report'!$B:$B,'NTX Giving Report'!M:M)=""Anonymous"","""",XLOOKUP($A2,'NTX Giving Report'!$B:$B,'NTX Giving Report'!M:M))"
+            wsSFImport.Range("H2").Formula = "=XLOOKUP($A2,'NTX Giving Report'!$B:$B,'NTX Giving Report'!AB:AB)"
+            wsSFImport.Range("I2").Formula = "=""Benbrook"""
+            wsSFImport.Range("J2").Formula = "=XLOOKUP($A2,'NTX Giving Report'!$B:$B,'NTX Giving Report'!O:O)&"" ""&XLOOKUP($A2,'NTX Giving Report'!$B:$B,'NTX Giving Report'!P:P)"
+            wsSFImport.Range("K2").Formula = "=""NTX Giving"""
+            
+        ' Step 27: Create a variable ('SFImportLastRow') to find the last row of the "Salesforce Import File" [wsSFImport] worksheet and then fill down the values
+            SFImportLastRow = wsSFImport.Cells(wsSFImport.Rows.Count, 1).End(xlUp).Row
+            
+            If SFImportLastRow > 2 Then
+                wsSFImport.Range("B2:K" & SFImportLastRow).FillDown
+            End If
+            
+        ' Step 28: AutoFit the columns in the "Salesforce Import File" [wsSFImport] worksheet and highlight the tab color as green
+            wsSFImport.Range("A:K").Columns.AutoFit
+            wsSFImport.Tab.Color = vbGreen
+
+        ' Step 29: Let the user know the macro is complete and the file is in a new folder to upload to SharePoint.
+            MsgBox "The macro has completed. Please double check that everything looks correct!" _
+                    & vbCrLf & vbCrLf & " The following processes were completed using this macro: " _
+                    & vbCrLf & "• Disbursement ID added to the report." _
+                    & vbCrLf & "• A new file was created, including the Disbursement ID in it." _
+                    & vbCrLf & "• A Salesforce Import File was created." _
+                    & vbCrLf & vbCrLf & vbCrLf & "**The new file was placed into a new folder in the original folder path.**" _
+                    & vbCrLf & vbCrLf & "Please place this new file into the 'AR' Team's SharePoint Folder!" _
+                    , vbInformation, "Confirmation of Macro Completion"
+                    
+               
+
+End Sub
