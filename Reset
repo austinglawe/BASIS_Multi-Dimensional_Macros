@@ -1,0 +1,946 @@
+Public Sub Create_Reset_Worksheet()
+
+''' This macro is meant to delete all worksheets and create a reset page for the user to return back to a selection page '''
+    
+    Dim wsNew As Worksheet
+    Dim TimeSheet As String
+    Dim ws As Worksheet
+    Dim SelectionPageButton As Button
+
+    ' Step 1: Create a variable called TimeSheet to hold the value "ZYXWV_" and the current date-time (YYYY.MM.DD-HH.MM.SS) - Year.Month.Day-Hour.Minute.Second _
+        ' An example of this would look like "ZYXWV_2024.05.06-13.47.06"
+            TimeSheet = "ZYXWV_" & Format(Now(), "YYYY.MM.DD-HH.MM.SS")
+    
+    
+    ' Step 2: Use the TimeSheet value to create a new worksheet (one that is very unlikely to already have that name)
+        Set wsNew = ThisWorkbook.Worksheets.Add
+        wsNew.Name = TimeSheet
+        
+        
+    ' Step 3: Keep only the worksheet with the name with the variable TimeSheet
+        ' Step 3.1: To speed up the process, don't display alerts
+            Application.DisplayAlerts = False
+        ' Step 3.2: Create the loop to only keep the Worksheet with the variable TimeSheet Name
+            For Each ws In ThisWorkbook.Worksheets
+                If ws.Name <> TimeSheet Then
+                    ws.Delete
+                End If
+            Next ws
+        ' Step 3.1: Turn back on displaying alerts
+            Application.DisplayAlerts = True
+            
+            
+    ' Step 4: Change the worksheet to "COMPLETE RESET" - This Worksheet will reset everything back to the default
+        wsNew.Name = "COMPLETE RESET"
+        
+        
+    ' Step 5: Fill the Background color of all cells as a black color
+        wsNew.Cells.Interior.Color = RGB(0, 0, 0)
+        
+        
+    ' Step 6: Create a macro button to allow user to go back to selection page, in order to select a new converter.
+        ' Step 6.1: Button (Starting Point- Left to Right, Starting Point- Up and Down, Length of Button, Height of Button)
+            Set SelectionPageButton = ActiveSheet.Buttons.Add(0, 0, 750, 500)
+        ' Step 6.2: Format the button
+            With SelectionPageButton
+                .Caption = "Click here to go back to the Converter Selection Page"
+                .OnAction = "Reset.Selection_Page"
+                .Font.Size = 70
+                .Font.Bold = True
+                .Font.Color = RGB(255, 0, 0)
+            End With
+    
+    
+    ' Step 7: Make the worksheet tab color yellow
+        wsNew.Tab.Color = RGB(255, 255, 0)
+        
+    
+    
+End Sub
+
+Public Sub Selection_Page()
+
+''' This macro is meant to go back to selection page (re-creating the selection page) - To be able to select a macro to run. '''
+
+    Dim response As VbMsgBoxResult
+    Dim wsSelectionPage As Worksheet
+    Dim TimeSheet As String
+    Dim ws As Worksheet
+    
+    ' Variables for Buttons for AR Team
+        Dim AR_225Gives As Button
+        Dim AR_AZGives As Button
+        Dim AR_Benevity As Button
+        Dim AR_BigGives As Button
+        Dim AR_ClickAndPledge As Button
+        Dim AR_CyberGrants As Button
+        Dim AR_FidelityGifts As Button
+        Dim AR_FrontStream As Button
+        Dim AR_NTXGiving As Button
+        Dim AR_YourCause As Button
+    
+    ' Variables for Buttons for SF Team
+        Dim SF_225Gives As Button
+        Dim SF_AZGives As Button
+        Dim SF_Benevity As Button
+        Dim SF_BigGives As Button
+        Dim SF_ClickAndPledge As Button
+        Dim SF_CyberGrants As Button
+        Dim SF_FidelityGifts As Button
+        Dim SF_FrontStream As Button
+        Dim SF_NTXGiving As Button
+        Dim SF_YourCause As Button
+    
+    ' Links Variables
+        Dim SFReport_ManualImports As String
+        Dim SFReport_ClickandPledge As String
+        
+        SFReport_ManualImports = "https://basised.lightning.force.com/lightning/r/Report/00OHp000008pMl6MAE/view?queryScope=userFolders"
+        SFReport_ClickandPledge = "https://basised.lightning.force.com/lightning/r/Report/00ORj000001es7ZMAQ/view?queryScope=userFolders"
+    
+    
+    ' Step 1: Ask user if they are sure they want to go back to the selection page
+        response = MsgBox("Are you sure you want to go back to the Converter Selection Page? If you choose yes, all data will be lost. This process is irreversible.", vbYesNo + vbQuestion, "Confirmation to go to Converter Selection Page")
+
+
+    ' Step 2: Check the user's response - If they choose no, end the sub, otherwise continue to the next steps.
+        If response = vbNo Then
+            Exit Sub
+        End If
+    
+    Application.Calculation = xlManual
+
+    
+    
+    ' Step 3: Create a variable called TimeSheet to hold the value "ZYXWV_" and the current date-time (YYYY.MM.DD-HH.MM.SS) - Year.Month.Day-Hour.Minute.Second _
+        ' An example of this would look like "ZYXWV_2024.05.06-13.47.06"
+            TimeSheet = "ZYXWV_" & Format(Now(), "YYYY.MM.DD-HH.MM.SS")
+    
+    
+    ' Step 4: Use the TimeSheet value to create a new worksheet (one that is very unlikely to already have that name)
+        Set wsSelectionPage = ThisWorkbook.Worksheets.Add
+        wsSelectionPage.Name = TimeSheet
+        
+        
+    ' Step 5: Keep only the worksheet with the name with the variable TimeSheet
+        ' Step 5.1: To speed up the process, don't display alerts
+            Application.DisplayAlerts = False
+        ' Step 5.2: Create the loop to only keep the Worksheet with the variable TimeSheet Name
+            For Each ws In ThisWorkbook.Worksheets
+                If ws.Name <> TimeSheet Then
+                    ws.Delete
+                End If
+            Next ws
+        ' Step 5.3: Turn back on displaying alerts
+            Application.DisplayAlerts = True
+
+
+    ' Step 6: Rename TimeSheet Worksheet to "Converter Selection Page"
+        wsSelectionPage.Name = "Converter Selection Page"
+
+    
+    ' Step 7: Create the headers for the "Converter Selection Page" Worksheet.
+        wsSelectionPage.Range("A1").value = "Press Button Below To Run Macro"
+        wsSelectionPage.Range("B1").value = "Converter Name"
+        wsSelectionPage.Range("C1").value = "Converter's Department"
+        wsSelectionPage.Range("D1").value = "Donation Website Link"
+        wsSelectionPage.Range("E1").value = "Salesforce Report Link"
+        wsSelectionPage.Range("F1").value = "Converter's Description"
+        
+    
+    ' Step 8: Format the Column Headers' Row
+        With wsSelectionPage.Range("A1:F1")
+            .Font.Bold = True
+            .Font.Underline = True
+            .AutoFilter
+        End With
+        
+    
+    ' Step 9: Populate Column B with the Converter Names
+        wsSelectionPage.Range("B2").value = "225 Gives"
+        wsSelectionPage.Range("B3").value = "225 Gives"
+        wsSelectionPage.Range("B4").value = "AZ Gives"
+        wsSelectionPage.Range("B5").value = "AZ Gives"
+        wsSelectionPage.Range("B6").value = "Benevity"
+        wsSelectionPage.Range("B7").value = "Benevity"
+        wsSelectionPage.Range("B8").value = "Big Gives/Bonterra Tech/Give Gab"
+        wsSelectionPage.Range("B9").value = "Big Gives/Bonterra Tech/Give Gab"
+        wsSelectionPage.Range("B10").value = "Click & Pledge"
+        wsSelectionPage.Range("B11").value = "Click & Pledge"
+        wsSelectionPage.Range("B12").value = "Cyber Grants"
+        wsSelectionPage.Range("B13").value = "Cyber Grants"
+        wsSelectionPage.Range("B14").value = "Fidelity Gifts"
+        wsSelectionPage.Range("B15").value = "Fidelity Gifts"
+        wsSelectionPage.Range("B16").value = "Front Stream"
+        wsSelectionPage.Range("B17").value = "Front Stream"
+        wsSelectionPage.Range("B18").value = "NTX Giving Day"
+        wsSelectionPage.Range("B19").value = "NTX Giving Day"
+        wsSelectionPage.Range("B20").value = "Your Cause"
+        wsSelectionPage.Range("B21").value = "Your Cause"
+        
+    
+    ' Step 10: Populate Column C with the intended department user
+        wsSelectionPage.Range("C2").value = "Accounts Receivable (AR) Team"
+        wsSelectionPage.Range("C3").value = "Salesforce Team"
+        wsSelectionPage.Range("C4").value = "Accounts Receivable (AR) Team"
+        wsSelectionPage.Range("C5").value = "Salesforce Team"
+        wsSelectionPage.Range("C6").value = "Accounts Receivable (AR) Team"
+        wsSelectionPage.Range("C7").value = "Salesforce Team"
+        wsSelectionPage.Range("C8").value = "Accounts Receivable (AR) Team"
+        wsSelectionPage.Range("C9").value = "Salesforce Team"
+        wsSelectionPage.Range("C10").value = "Accounts Receivable (AR) Team"
+        wsSelectionPage.Range("C11").value = "Salesforce Team"
+        wsSelectionPage.Range("C12").value = "Accounts Receivable (AR) Team"
+        wsSelectionPage.Range("C13").value = "Salesforce Team"
+        wsSelectionPage.Range("C14").value = "Accounts Receivable (AR) Team"
+        wsSelectionPage.Range("C15").value = "Salesforce Team"
+        wsSelectionPage.Range("C16").value = "Accounts Receivable (AR) Team"
+        wsSelectionPage.Range("C17").value = "Salesforce Team"
+        wsSelectionPage.Range("C18").value = "Accounts Receivable (AR) Team"
+        wsSelectionPage.Range("C19").value = "Salesforce Team"
+        wsSelectionPage.Range("C20").value = "Accounts Receivable (AR) Team"
+        wsSelectionPage.Range("C21").value = "Salesforce Team"
+
+    
+    ' Step 11: Populate Column D with the Donation Website Link
+        ' 225 Gives
+            wsSelectionPage.Hyperlinks.Add Anchor:=wsSelectionPage.Range("D2"), Address:="https://app.neonsso.com/login?client_id=CJtL0DWvnU8LBPz0S6dYu4ydoA3zYsCu&response_type=code&scope=openid&redirect_uri=https%3A%2F%2Fapp.neongivingdays.com%2Findex.php%3Fsection%3Ddashboards%26action%3Dcondition%26loginModule%3D0%26ssoLogin%3D1&state=6501d7c6cc3f3&nonce=6501d7c6cc3f5&config_token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwczpcL1wvYXBwLm5lb25naXZpbmdkYXlzLmNvbSIsImlhdCI6MTY5NDYxOTU5MCwiZXhwIjoxNjk0NjIzMTkwLCJwcm9kdWN0X2JyYW5kX2lkIjoiMTciLCJob3N0cyI6ImFwcC5uZW9uZ2l2aW5nZGF5cy5jb20ifQ.lugmOChzTnNZaY8PRAC2siXtHYKETjlkHXY0KLROblA", TextToDisplay:="225 Gives Donation Website Link"
+            wsSelectionPage.Hyperlinks.Add Anchor:=wsSelectionPage.Range("D3"), Address:="https://app.neonsso.com/login?client_id=CJtL0DWvnU8LBPz0S6dYu4ydoA3zYsCu&response_type=code&scope=openid&redirect_uri=https%3A%2F%2Fapp.neongivingdays.com%2Findex.php%3Fsection%3Ddashboards%26action%3Dcondition%26loginModule%3D0%26ssoLogin%3D1&state=6501d7c6cc3f3&nonce=6501d7c6cc3f5&config_token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwczpcL1wvYXBwLm5lb25naXZpbmdkYXlzLmNvbSIsImlhdCI6MTY5NDYxOTU5MCwiZXhwIjoxNjk0NjIzMTkwLCJwcm9kdWN0X2JyYW5kX2lkIjoiMTciLCJob3N0cyI6ImFwcC5uZW9uZ2l2aW5nZGF5cy5jb20ifQ.lugmOChzTnNZaY8PRAC2siXtHYKETjlkHXY0KLROblA", TextToDisplay:="225 Gives Donation Website Link"
+        ' AZ Gives
+            wsSelectionPage.Hyperlinks.Add Anchor:=wsSelectionPage.Range("D4"), Address:="https://app.neonsso.com/login?client_id=CJtL0DWvnU8LBPz0S6dYu4ydoA3zYsCu&response_type=code&scope=openid&redirect_uri=https%3A%2F%2Fazgives.civicore.com%2Findex.php%3Fsection%3Ddashboards%26action%3Dcondition%26loginModule%3D0%26ssoLogin%3D1&state=64d55bea564fe&nonce=64d55bea564ff&config_token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwczpcL1wvYXpnaXZlcy5jaXZpY29yZS5jb20iLCJpYXQiOjE2OTE3MDQyOTgsImV4cCI6MTY5MTcwNzg5OCwicHJvZHVjdF9icmFuZF9pZCI6IjEyIiwiaG9zdHMiOiJhemdpdmVzLmNpdmljb3JlLmNvbSJ9.uCQrNKOfZD_AvjvYDotRUrNcF4O9OzBE89JeCbkcG0c", TextToDisplay:="AZ Gives Donation Website Link"
+            wsSelectionPage.Hyperlinks.Add Anchor:=wsSelectionPage.Range("D5"), Address:="https://app.neonsso.com/login?client_id=CJtL0DWvnU8LBPz0S6dYu4ydoA3zYsCu&response_type=code&scope=openid&redirect_uri=https%3A%2F%2Fazgives.civicore.com%2Findex.php%3Fsection%3Ddashboards%26action%3Dcondition%26loginModule%3D0%26ssoLogin%3D1&state=64d55bea564fe&nonce=64d55bea564ff&config_token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwczpcL1wvYXpnaXZlcy5jaXZpY29yZS5jb20iLCJpYXQiOjE2OTE3MDQyOTgsImV4cCI6MTY5MTcwNzg5OCwicHJvZHVjdF9icmFuZF9pZCI6IjEyIiwiaG9zdHMiOiJhemdpdmVzLmNpdmljb3JlLmNvbSJ9.uCQrNKOfZD_AvjvYDotRUrNcF4O9OzBE89JeCbkcG0c", TextToDisplay:="AZ Gives Donation Website Link"
+        ' Benevity
+            wsSelectionPage.Hyperlinks.Add Anchor:=wsSelectionPage.Range("D6"), Address:="https://causes.benevity.org/user?hsCtaTracking=70669402-b761-4e69-b77b-ffe82c79f012%7C2d2019f4-8678-4187-a2bb-d36e5b1095ca", TextToDisplay:="Benevity Donation Website Link"
+            wsSelectionPage.Hyperlinks.Add Anchor:=wsSelectionPage.Range("D7"), Address:="https://causes.benevity.org/user?hsCtaTracking=70669402-b761-4e69-b77b-ffe82c79f012%7C2d2019f4-8678-4187-a2bb-d36e5b1095ca", TextToDisplay:="Benevity Donation Website Link"
+        ' Big Gives/ Bonterra Tech/ Give Gab
+            wsSelectionPage.Hyperlinks.Add Anchor:=wsSelectionPage.Range("D8"), Address:="https://www.givegab.com/users/sign_in", TextToDisplay:="Big Gives/Bonterra Tech/Give Gab Donation Website Link"
+            wsSelectionPage.Hyperlinks.Add Anchor:=wsSelectionPage.Range("D9"), Address:="https://www.givegab.com/users/sign_in", TextToDisplay:="Big Gives/Bonterra Tech/Give Gab Donation Website Link"
+        ' Click and Pledge
+            wsSelectionPage.Hyperlinks.Add Anchor:=wsSelectionPage.Range("D10"), Address:="https://login.connect.clickandpledge.com/", TextToDisplay:="Click and Pledge Donation Website Link"
+            wsSelectionPage.Hyperlinks.Add Anchor:=wsSelectionPage.Range("D11"), Address:="https://login.connect.clickandpledge.com/", TextToDisplay:="Click and Pledge Donation Website Link"
+        ' Cyber Grants
+            wsSelectionPage.Hyperlinks.Add Anchor:=wsSelectionPage.Range("D12"), Address:="https://www.cybergrants.com/pls/cybergrants/ao_login.login?x_gm_id=1&x_style_id=&x_proposal_type_id=9019", TextToDisplay:="Cyber Grants Donation Website Link"
+            wsSelectionPage.Hyperlinks.Add Anchor:=wsSelectionPage.Range("D13"), Address:="https://www.cybergrants.com/pls/cybergrants/ao_login.login?x_gm_id=1&x_style_id=&x_proposal_type_id=9019", TextToDisplay:="Cyber Grants Donation Website Link"
+        ' Fidelity Giving
+            wsSelectionPage.Hyperlinks.Add Anchor:=wsSelectionPage.Range("D14"), Address:="https://connect.stripe.com/express_login", TextToDisplay:="Fidelity Giving Donation Website Link"
+            wsSelectionPage.Hyperlinks.Add Anchor:=wsSelectionPage.Range("D15"), Address:="https://connect.stripe.com/express_login", TextToDisplay:="Fidelity Giving Donation Website Link"
+        ' Front Stream
+            wsSelectionPage.Hyperlinks.Add Anchor:=wsSelectionPage.Range("D16"), Address:="https://connect.frontstream.com/Login", TextToDisplay:="Front Stream Donation Website Link"
+            wsSelectionPage.Hyperlinks.Add Anchor:=wsSelectionPage.Range("D17"), Address:="https://connect.frontstream.com/Login", TextToDisplay:="Front Stream Donation Website Link"
+        ' NTX Giving Day
+            wsSelectionPage.Hyperlinks.Add Anchor:=wsSelectionPage.Range("D18"), Address:="https://www.northtexasgivingday.org/login?redirectUrl=/giving-events/ntx23", TextToDisplay:="NTX Giving Donation Website Link"
+            wsSelectionPage.Hyperlinks.Add Anchor:=wsSelectionPage.Range("D19"), Address:="https://www.northtexasgivingday.org/login?redirectUrl=/giving-events/ntx23", TextToDisplay:="NTX Giving Donation Website Link"
+        ' Your Cause
+            wsSelectionPage.Hyperlinks.Add Anchor:=wsSelectionPage.Range("D20"), Address:="https://nonprofit.yourcause.com/login", TextToDisplay:="Your Cause Donation Website Link"
+            wsSelectionPage.Hyperlinks.Add Anchor:=wsSelectionPage.Range("D21"), Address:="https://nonprofit.yourcause.com/login", TextToDisplay:="Your Cause Donation Website Link"
+            
+        
+    
+    ' Step 12: Populate Column E with Salesforce Report Link
+        ' 225 Gives
+            wsSelectionPage.Hyperlinks.Add Anchor:=wsSelectionPage.Range("E2"), Address:=SFReport_ManualImports, TextToDisplay:="SF 'Manual Imports' Report Link"
+            wsSelectionPage.Hyperlinks.Add Anchor:=wsSelectionPage.Range("E3"), Address:=SFReport_ManualImports, TextToDisplay:="SF 'Manual Imports' Report Link"
+        ' AZ Gives
+            wsSelectionPage.Hyperlinks.Add Anchor:=wsSelectionPage.Range("E4"), Address:=SFReport_ManualImports, TextToDisplay:="SF 'Manual Imports' Report Link"
+            wsSelectionPage.Hyperlinks.Add Anchor:=wsSelectionPage.Range("E5"), Address:=SFReport_ManualImports, TextToDisplay:="SF 'Manual Imports' Report Link"
+        ' Benevity
+            wsSelectionPage.Hyperlinks.Add Anchor:=wsSelectionPage.Range("E6"), Address:=SFReport_ManualImports, TextToDisplay:="SF 'Manual Imports' Report Link"
+            wsSelectionPage.Hyperlinks.Add Anchor:=wsSelectionPage.Range("E7"), Address:=SFReport_ManualImports, TextToDisplay:="SF 'Manual Imports' Report Link"
+        ' Big Gives/ Bonterra Tech/ Give Gab
+            wsSelectionPage.Hyperlinks.Add Anchor:=wsSelectionPage.Range("E8"), Address:=SFReport_ManualImports, TextToDisplay:="SF 'Manual Imports' Report Link"
+            wsSelectionPage.Hyperlinks.Add Anchor:=wsSelectionPage.Range("E9"), Address:=SFReport_ManualImports, TextToDisplay:="SF 'Manual Imports' Report Link"
+        ' Click and Pledge
+            wsSelectionPage.Hyperlinks.Add Anchor:=wsSelectionPage.Range("E10"), Address:=SFReport_ClickandPledge, TextToDisplay:="SF Click and Pledge Report Link"
+            wsSelectionPage.Hyperlinks.Add Anchor:=wsSelectionPage.Range("E11"), Address:=SFReport_ClickandPledge, TextToDisplay:="SF Click and Pledge Report Link"
+        ' Cyber Grants
+            wsSelectionPage.Hyperlinks.Add Anchor:=wsSelectionPage.Range("E12"), Address:=SFReport_ManualImports, TextToDisplay:="SF 'Manual Imports' Report Link"
+            wsSelectionPage.Hyperlinks.Add Anchor:=wsSelectionPage.Range("E13"), Address:=SFReport_ManualImports, TextToDisplay:="SF 'Manual Imports' Report Link"
+        ' Fidelity Giving
+            wsSelectionPage.Hyperlinks.Add Anchor:=wsSelectionPage.Range("E14"), Address:=SFReport_ManualImports, TextToDisplay:="SF 'Manual Imports' Report Link"
+            wsSelectionPage.Hyperlinks.Add Anchor:=wsSelectionPage.Range("E15"), Address:=SFReport_ManualImports, TextToDisplay:="SF 'Manual Imports' Report Link"
+        ' Front Stream
+            wsSelectionPage.Hyperlinks.Add Anchor:=wsSelectionPage.Range("E16"), Address:=SFReport_ManualImports, TextToDisplay:="SF 'Manual Imports' Report Link"
+            wsSelectionPage.Hyperlinks.Add Anchor:=wsSelectionPage.Range("E17"), Address:=SFReport_ManualImports, TextToDisplay:="SF 'Manual Imports' Report Link"
+        ' NTX Giving Day
+            wsSelectionPage.Hyperlinks.Add Anchor:=wsSelectionPage.Range("E18"), Address:=SFReport_ManualImports, TextToDisplay:="SF 'Manual Imports' Report Link"
+            wsSelectionPage.Hyperlinks.Add Anchor:=wsSelectionPage.Range("E19"), Address:=SFReport_ManualImports, TextToDisplay:="SF 'Manual Imports' Report Link"
+        ' Your Cause
+            wsSelectionPage.Hyperlinks.Add Anchor:=wsSelectionPage.Range("E20"), Address:=SFReport_ManualImports, TextToDisplay:="SF 'Manual Imports' Report Link"
+            wsSelectionPage.Hyperlinks.Add Anchor:=wsSelectionPage.Range("E21"), Address:=SFReport_ManualImports, TextToDisplay:="SF 'Manual Imports' Report Link"
+            
+    
+    ' Step 13: Populate Column F with the Converter's intended use.
+        wsSelectionPage.Range("F2").value = ""
+        wsSelectionPage.Range("F3").value = "This macro is meant to streamline the process of consolidating and converting the '225 Gives' Reports into a Salesforce Import File."
+        wsSelectionPage.Range("F4").value = ""
+        wsSelectionPage.Range("F5").value = "This macro is meant to streamline the process of converting the 'AZ Gives' Report into a Salesforce Import File."
+        wsSelectionPage.Range("F6").value = ""
+        wsSelectionPage.Range("F7").value = "This macro is meant to streamline the process of consolidating and converting the 'Benevity' Reports into a Salesforce Import File. It also renames the Files' Names appropriately."
+        wsSelectionPage.Range("F8").value = ""
+        wsSelectionPage.Range("F9").value = "This macro is meant to streamline the process of converting the 'Big Gives/Bonterra Tech/Give Gab' Report into a Salesforce Import File."
+        wsSelectionPage.Range("F10").value = ""
+        wsSelectionPage.Range("F11").value = ""
+        wsSelectionPage.Range("F12").value = ""
+        wsSelectionPage.Range("F13").value = "This macro is meant to streamline the process of consolidating and converting the 'Cyber Grants' Reports into a Salesforce Import File. It also renames the Files' Names appropriately."
+        wsSelectionPage.Range("F14").value = ""
+        wsSelectionPage.Range("F15").value = "This macro is meant to streamline the process of converting the 'Fidelity Gifts' Report into a Salesforce Import File."
+        wsSelectionPage.Range("F16").value = ""
+        wsSelectionPage.Range("F17").value = "This macro is meant to streamline the process of consolidating and converting the 'Front Stream' Reports into a Salesforce Import File. It also renames the Files' Names appropriately."
+        wsSelectionPage.Range("F18").value = ""
+        wsSelectionPage.Range("F19").value = "This macro is meant to streamline the process of consolidating and converting the 'NTX Giving Day' Reports into a Salesforce Import File. It also renames the Files' Names appropriately."
+        wsSelectionPage.Range("F20").value = ""
+        wsSelectionPage.Range("F21").value = "This macro is meant to streamline the process of consolidating and converting the 'Your Cause' Reports into a Salesforce Import File. It also renames the Files' Names appropriately."
+        
+    
+    ' Step 14: Set the Size of Columns and Rows A2 through E40
+        wsSelectionPage.Range("A:A").ColumnWidth = 80
+        wsSelectionPage.Range("B:F").Columns.AutoFit
+        wsSelectionPage.Rows("1:1").RowHeight = 18#
+        wsSelectionPage.Rows("2:40").RowHeight = 30#
+        wsSelectionPage.Cells.Interior.Color = RGB(0, 0, 0)
+        wsSelectionPage.Cells.Font.Color = RGB(255, 255, 255)
+        
+        
+    ' Step 15: Create the buttons for each of the converters.
+    
+        ' Step 15.1: 225 Gives
+            ' AR Team's Macro
+                Set AR_225Gives = ActiveSheet.Buttons.Add(0, 19, 375, 29.5)
+                With AR_225Gives
+                    .Caption = "Click here to run the 'AR' 225 Gives Macro"
+                    .OnAction = "BBR_225Gives.AR_225Gives_Part1"
+                    .Font.Size = 15
+                    .Font.Bold = True
+                    .Font.Color = RGB(0, 175, 0)
+                End With
+            ' SF Team's Macro
+                Set SF_225Gives = ActiveSheet.Buttons.Add(0, 49, 375, 29.5)
+                With SF_225Gives
+                    .Caption = "Click here to run the 'SF' 225 Gives Macro"
+                    .OnAction = "BBR_225Gives.SF_225Gives"
+                    .Font.Size = 15
+                    .Font.Bold = True
+                    .Font.Color = RGB(0, 130, 225)
+                End With
+                
+        ' Step 15.2: AZ Gives
+            ' AR Team's Macro
+                Set AR_AZGives = ActiveSheet.Buttons.Add(0, 79, 375, 29.5)
+                With AR_AZGives
+                    .Caption = "Click here to run the 'AR' AZ Gives Macro"
+                    .OnAction = "AZGives.AZGives_AR_Part1"
+                    .Font.Size = 15
+                    .Font.Bold = True
+                    .Font.Color = RGB(0, 175, 0)
+                End With
+            ' SF Team's Macro
+                Set SF_AZGives = ActiveSheet.Buttons.Add(0, 109, 375, 29.5)
+                With SF_AZGives
+                    .Caption = "Click here to run the 'SF' AZ Gives Macro"
+                    .OnAction = "AZGives.AZGives_SF"
+                    .Font.Size = 15
+                    .Font.Bold = True
+                    .Font.Color = RGB(0, 130, 225)
+                End With
+        
+        ' Step 15.3: Benevity
+            ' AR Team's Macro
+                Set AR_Benevity = ActiveSheet.Buttons.Add(0, 139, 375, 29.5)
+                With AR_Benevity
+                    .Caption = "Click here to run the 'AR' Benevity Macro"
+                    .OnAction = "Benevity.Benevity_AR_Part1"
+                    .Font.Size = 15
+                    .Font.Bold = True
+                    .Font.Color = RGB(0, 175, 0)
+                End With
+            ' SF Team's Macro
+                Set SF_Benevity = ActiveSheet.Buttons.Add(0, 169, 375, 29.5)
+                With SF_Benevity
+                    .Caption = "Click here to run the 'SF' Benevity Macro"
+                    .OnAction = "Benevity.Benevity_SF_Part1"
+                    .Font.Size = 15
+                    .Font.Bold = True
+                    .Font.Color = RGB(0, 130, 225)
+                End With
+                
+        ' Step 15.4: Big Gives/Bonterra Tech/ Give Gab
+            ' AR Team's Macro
+                Set AR_BigGives = ActiveSheet.Buttons.Add(0, 199, 375, 29.5)
+                With AR_BigGives
+                    .Caption = "Click here to run the 'AR' Give Gab Macro"
+                    .OnAction = "BigGive_GiveGab_BonterraTech.GiveGab_AR_Part1"
+                    .Font.Size = 15
+                    .Font.Bold = True
+                    .Font.Color = RGB(0, 175, 0)
+                End With
+            ' SF Team's Macro
+                Set SF_BigGives = ActiveSheet.Buttons.Add(0, 229, 375, 29.5)
+                With SF_BigGives
+                    .Caption = "Click here to run the 'SF' Give Gab Macro"
+                    .OnAction = "BigGive_GiveGab_BonterraTech.GiveGab_SF"
+                    .Font.Size = 15
+                    .Font.Bold = True
+                    .Font.Color = RGB(0, 130, 225)
+                End With
+        
+        ' Step 15.5: Click & Pledge
+            ' AR Team's Macro
+                Set AR_ClickAndPledge = ActiveSheet.Buttons.Add(0, 259, 375, 29.5)
+                With AR_ClickAndPledge
+                    .Caption = "Click here to run the 'AR' Monthly Click and Pledge Macro"
+                    .OnAction = "Click_and_Pledge.Click_and_Pledge_Monthly_AR_Part1"
+                    .Font.Size = 15
+                    .Font.Bold = True
+                    .Font.Color = RGB(0, 175, 0)
+                End With
+            ' SF Team's Macro Does Not Exist
+                With wsSelectionPage.Range("A11")
+                    .value = "''SF' Click and Pledge Macro does not exist"
+                    .Font.Bold = True
+                    .Font.Size = 15
+                End With
+                
+        ' Step 15.6: Cyber Grants
+            ' AR Team's Macro
+                Set AR_CyberGrants = ActiveSheet.Buttons.Add(0, 319, 375, 29.5)
+                With AR_CyberGrants
+                    .Caption = "Click here to run the 'AR' Cyber Grants Macro"
+                    .OnAction = "CyberGrants.CyberGrants_AR_Part1"
+                    .Font.Size = 15
+                    .Font.Bold = True
+                    .Font.Color = RGB(0, 175, 0)
+                End With
+            ' SF Team's Macro
+                Set SF_CyberGrants = ActiveSheet.Buttons.Add(0, 349, 375, 29.5)
+                With SF_CyberGrants
+                    .Caption = "Click here to run the 'SF' Cyber Grants Macro"
+                    .OnAction = "CyberGrants.CyberGrants_SF_Part1"
+                    .Font.Size = 15
+                    .Font.Bold = True
+                    .Font.Color = RGB(0, 130, 225)
+                End With
+                
+        ' Step 15.7: Fidelity Gifts
+            ' AR Team's Macro
+                Set AR_FidelityGifts = ActiveSheet.Buttons.Add(0, 379, 375, 29.5)
+                With AR_FidelityGifts
+                    .Caption = "Click here to run the 'AR' Fidelity Gifts Macro"
+                    .OnAction = "Fidelity.Fidelity_AR_Part1"
+                    .Font.Size = 15
+                    .Font.Bold = True
+                    .Font.Color = RGB(0, 175, 0)
+                End With
+            ' SF Team's Macro
+                Set SF_FidelityGifts = ActiveSheet.Buttons.Add(0, 409, 375, 29.5)
+                With SF_FidelityGifts
+                    .Caption = "Click here to run the 'SF' Fidelity Gifts Macro"
+                    .OnAction = "Fidelity.Fidelity_SF"
+                    .Font.Size = 15
+                    .Font.Bold = True
+                    .Font.Color = RGB(0, 130, 225)
+                End With
+                
+        ' Step 15.8: Front Stream
+            ' AR Team's Macro
+                Set AR_FrontStream = ActiveSheet.Buttons.Add(0, 439, 375, 29.5)
+                With AR_FrontStream
+                    .Caption = "Click here to run the 'AR' Front Stream Macro"
+                    .OnAction = "FrontStream.FrontStream_AR_Part1"
+                    .Font.Size = 15
+                    .Font.Bold = True
+                    .Font.Color = RGB(0, 175, 0)
+                End With
+            ' SF Team's Macro
+                Set SF_FrontStream = ActiveSheet.Buttons.Add(0, 469, 375, 29.5)
+                With SF_FrontStream
+                    .Caption = "Click here to run the 'SF' Front Stream Macro"
+                    .OnAction = "FrontStream.FrontStream_SF"
+                    .Font.Size = 15
+                    .Font.Bold = True
+                    .Font.Color = RGB(0, 130, 225)
+                End With
+        
+        ' Step 15.9: NTX Giving Day
+            ' AR Team's Macro
+                Set AR_NTXGiving = ActiveSheet.Buttons.Add(0, 499, 375, 29.5)
+                With AR_NTXGiving
+                    .Caption = "Click here to run the 'AR' NTX Giving Day Macro"
+                    .OnAction = "NTXGiving.NTXGiving_AR_Part1"
+                    .Font.Size = 15
+                    .Font.Bold = True
+                    .Font.Color = RGB(0, 175, 0)
+                End With
+            ' SF Team's Macro
+                Set SF_NTXGiving = ActiveSheet.Buttons.Add(0, 529, 375, 29.5)
+                With SF_NTXGiving
+                    .Caption = "Click here to run the 'SF' NTX Giving Day Macro"
+                    .OnAction = "NTXGiving.NTXGiving_SF"
+                    .Font.Size = 15
+                    .Font.Bold = True
+                    .Font.Color = RGB(0, 130, 225)
+                End With
+        
+        ' Step 15.10: Your Cause
+            ' AR Team's Macro
+                Set AR_YourCause = ActiveSheet.Buttons.Add(0, 559, 375, 29.5)
+                With AR_YourCause
+                    .Caption = "Click here to run the 'AR' Your Cause Macro"
+                    .OnAction = "YourCause.YourCause_AR_Part1"
+                    .Font.Size = 15
+                    .Font.Bold = True
+                    .Font.Color = RGB(0, 175, 0)
+                End With
+            ' SF Team's Macro
+                Set SF_YourCause = ActiveSheet.Buttons.Add(0, 589, 375, 29.5)
+                With SF_YourCause
+                    .Caption = "Click here to run the 'SF' Your Cause Macro"
+                    .OnAction = "YourCause.YourCause_SF"
+                    .Font.Size = 15
+                    .Font.Bold = True
+                    .Font.Color = RGB(0, 130, 225)
+                End With
+                
+        Application.Calculation = xlAutomatic
+
+
+End Sub
+
+
+Public Sub Selection_Page_NoPrompt()
+
+''' This macro is meant to go back to selection page (re-creating the selection page) - To be able to select a macro to run. '''
+
+    Dim response As VbMsgBoxResult
+    Dim wsSelectionPage As Worksheet
+    Dim TimeSheet As String
+    Dim ws As Worksheet
+    
+    ' Variables for Buttons for AR Team
+        Dim AR_225Gives As Button
+        Dim AR_AZGives As Button
+        Dim AR_Benevity As Button
+        Dim AR_BigGives As Button
+        Dim AR_ClickAndPledge As Button
+        Dim AR_CyberGrants As Button
+        Dim AR_FidelityGifts As Button
+        Dim AR_FrontStream As Button
+        Dim AR_NTXGiving As Button
+        Dim AR_YourCause As Button
+    
+    ' Variables for Buttons for SF Team
+        Dim SF_225Gives As Button
+        Dim SF_AZGives As Button
+        Dim SF_Benevity As Button
+        Dim SF_BigGives As Button
+        Dim SF_ClickAndPledge As Button
+        Dim SF_CyberGrants As Button
+        Dim SF_FidelityGifts As Button
+        Dim SF_FrontStream As Button
+        Dim SF_NTXGiving As Button
+        Dim SF_YourCause As Button
+    
+    ' Links Variables
+        Dim SFReport_ManualImports As String
+        Dim SFReport_ClickandPledge As String
+        
+        SFReport_ManualImports = "https://basised.lightning.force.com/lightning/r/Report/00OHp000008pMl6MAE/view?queryScope=userFolders"
+        SFReport_ClickandPledge = "https://basised.lightning.force.com/lightning/r/Report/00ORj000001es7ZMAQ/view?queryScope=userFolders"
+    
+    Application.Calculation = xlManual
+
+    
+    
+    ' Step 3: Create a variable called TimeSheet to hold the value "ZYXWV_" and the current date-time (YYYY.MM.DD-HH.MM.SS) - Year.Month.Day-Hour.Minute.Second _
+        ' An example of this would look like "ZYXWV_2024.05.06-13.47.06"
+            TimeSheet = "ZYXWV_" & Format(Now(), "YYYY.MM.DD-HH.MM.SS")
+    
+    
+    ' Step 4: Use the TimeSheet value to create a new worksheet (one that is very unlikely to already have that name)
+        Set wsSelectionPage = ThisWorkbook.Worksheets.Add
+        wsSelectionPage.Name = TimeSheet
+        
+        
+    ' Step 5: Keep only the worksheet with the name with the variable TimeSheet
+        ' Step 5.1: To speed up the process, don't display alerts
+            Application.DisplayAlerts = False
+        ' Step 5.2: Create the loop to only keep the Worksheet with the variable TimeSheet Name
+            For Each ws In ThisWorkbook.Worksheets
+                If ws.Name <> TimeSheet Then
+                    ws.Delete
+                End If
+            Next ws
+        ' Step 5.3: Turn back on displaying alerts
+            Application.DisplayAlerts = True
+
+
+    ' Step 6: Rename TimeSheet Worksheet to "Converter Selection Page"
+        wsSelectionPage.Name = "Converter Selection Page"
+
+    
+    ' Step 7: Create the headers for the "Converter Selection Page" Worksheet.
+        wsSelectionPage.Range("A1").value = "Press Button Below To Run Macro"
+        wsSelectionPage.Range("B1").value = "Converter Name"
+        wsSelectionPage.Range("C1").value = "Converter's Department"
+        wsSelectionPage.Range("D1").value = "Donation Website Link"
+        wsSelectionPage.Range("E1").value = "Salesforce Report Link"
+        wsSelectionPage.Range("F1").value = "Converter's Description"
+        
+    
+    ' Step 8: Format the Column Headers' Row
+        With wsSelectionPage.Range("A1:F1")
+            .Font.Bold = True
+            .Font.Underline = True
+            .AutoFilter
+        End With
+        
+    
+    ' Step 9: Populate Column B with the Converter Names
+        wsSelectionPage.Range("B2").value = "225 Gives"
+        wsSelectionPage.Range("B3").value = "225 Gives"
+        wsSelectionPage.Range("B4").value = "AZ Gives"
+        wsSelectionPage.Range("B5").value = "AZ Gives"
+        wsSelectionPage.Range("B6").value = "Benevity"
+        wsSelectionPage.Range("B7").value = "Benevity"
+        wsSelectionPage.Range("B8").value = "Big Gives/Bonterra Tech/Give Gab"
+        wsSelectionPage.Range("B9").value = "Big Gives/Bonterra Tech/Give Gab"
+        wsSelectionPage.Range("B10").value = "Click & Pledge"
+        wsSelectionPage.Range("B11").value = "Click & Pledge"
+        wsSelectionPage.Range("B12").value = "Cyber Grants"
+        wsSelectionPage.Range("B13").value = "Cyber Grants"
+        wsSelectionPage.Range("B14").value = "Fidelity Gifts"
+        wsSelectionPage.Range("B15").value = "Fidelity Gifts"
+        wsSelectionPage.Range("B16").value = "Front Stream"
+        wsSelectionPage.Range("B17").value = "Front Stream"
+        wsSelectionPage.Range("B18").value = "NTX Giving Day"
+        wsSelectionPage.Range("B19").value = "NTX Giving Day"
+        wsSelectionPage.Range("B20").value = "Your Cause"
+        wsSelectionPage.Range("B21").value = "Your Cause"
+        
+    
+    ' Step 10: Populate Column C with the intended department user
+        wsSelectionPage.Range("C2").value = "Accounts Receivable (AR) Team"
+        wsSelectionPage.Range("C3").value = "Salesforce Team"
+        wsSelectionPage.Range("C4").value = "Accounts Receivable (AR) Team"
+        wsSelectionPage.Range("C5").value = "Salesforce Team"
+        wsSelectionPage.Range("C6").value = "Accounts Receivable (AR) Team"
+        wsSelectionPage.Range("C7").value = "Salesforce Team"
+        wsSelectionPage.Range("C8").value = "Accounts Receivable (AR) Team"
+        wsSelectionPage.Range("C9").value = "Salesforce Team"
+        wsSelectionPage.Range("C10").value = "Accounts Receivable (AR) Team"
+        wsSelectionPage.Range("C11").value = "Salesforce Team"
+        wsSelectionPage.Range("C12").value = "Accounts Receivable (AR) Team"
+        wsSelectionPage.Range("C13").value = "Salesforce Team"
+        wsSelectionPage.Range("C14").value = "Accounts Receivable (AR) Team"
+        wsSelectionPage.Range("C15").value = "Salesforce Team"
+        wsSelectionPage.Range("C16").value = "Accounts Receivable (AR) Team"
+        wsSelectionPage.Range("C17").value = "Salesforce Team"
+        wsSelectionPage.Range("C18").value = "Accounts Receivable (AR) Team"
+        wsSelectionPage.Range("C19").value = "Salesforce Team"
+        wsSelectionPage.Range("C20").value = "Accounts Receivable (AR) Team"
+        wsSelectionPage.Range("C21").value = "Salesforce Team"
+
+    
+    ' Step 11: Populate Column D with the Donation Website Link
+        ' 225 Gives
+            wsSelectionPage.Hyperlinks.Add Anchor:=wsSelectionPage.Range("D2"), Address:="https://app.neonsso.com/login?client_id=CJtL0DWvnU8LBPz0S6dYu4ydoA3zYsCu&response_type=code&scope=openid&redirect_uri=https%3A%2F%2Fapp.neongivingdays.com%2Findex.php%3Fsection%3Ddashboards%26action%3Dcondition%26loginModule%3D0%26ssoLogin%3D1&state=6501d7c6cc3f3&nonce=6501d7c6cc3f5&config_token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwczpcL1wvYXBwLm5lb25naXZpbmdkYXlzLmNvbSIsImlhdCI6MTY5NDYxOTU5MCwiZXhwIjoxNjk0NjIzMTkwLCJwcm9kdWN0X2JyYW5kX2lkIjoiMTciLCJob3N0cyI6ImFwcC5uZW9uZ2l2aW5nZGF5cy5jb20ifQ.lugmOChzTnNZaY8PRAC2siXtHYKETjlkHXY0KLROblA", TextToDisplay:="225 Gives Donation Website Link"
+            wsSelectionPage.Hyperlinks.Add Anchor:=wsSelectionPage.Range("D3"), Address:="https://app.neonsso.com/login?client_id=CJtL0DWvnU8LBPz0S6dYu4ydoA3zYsCu&response_type=code&scope=openid&redirect_uri=https%3A%2F%2Fapp.neongivingdays.com%2Findex.php%3Fsection%3Ddashboards%26action%3Dcondition%26loginModule%3D0%26ssoLogin%3D1&state=6501d7c6cc3f3&nonce=6501d7c6cc3f5&config_token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwczpcL1wvYXBwLm5lb25naXZpbmdkYXlzLmNvbSIsImlhdCI6MTY5NDYxOTU5MCwiZXhwIjoxNjk0NjIzMTkwLCJwcm9kdWN0X2JyYW5kX2lkIjoiMTciLCJob3N0cyI6ImFwcC5uZW9uZ2l2aW5nZGF5cy5jb20ifQ.lugmOChzTnNZaY8PRAC2siXtHYKETjlkHXY0KLROblA", TextToDisplay:="225 Gives Donation Website Link"
+        ' AZ Gives
+            wsSelectionPage.Hyperlinks.Add Anchor:=wsSelectionPage.Range("D4"), Address:="https://app.neonsso.com/login?client_id=CJtL0DWvnU8LBPz0S6dYu4ydoA3zYsCu&response_type=code&scope=openid&redirect_uri=https%3A%2F%2Fazgives.civicore.com%2Findex.php%3Fsection%3Ddashboards%26action%3Dcondition%26loginModule%3D0%26ssoLogin%3D1&state=64d55bea564fe&nonce=64d55bea564ff&config_token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwczpcL1wvYXpnaXZlcy5jaXZpY29yZS5jb20iLCJpYXQiOjE2OTE3MDQyOTgsImV4cCI6MTY5MTcwNzg5OCwicHJvZHVjdF9icmFuZF9pZCI6IjEyIiwiaG9zdHMiOiJhemdpdmVzLmNpdmljb3JlLmNvbSJ9.uCQrNKOfZD_AvjvYDotRUrNcF4O9OzBE89JeCbkcG0c", TextToDisplay:="AZ Gives Donation Website Link"
+            wsSelectionPage.Hyperlinks.Add Anchor:=wsSelectionPage.Range("D5"), Address:="https://app.neonsso.com/login?client_id=CJtL0DWvnU8LBPz0S6dYu4ydoA3zYsCu&response_type=code&scope=openid&redirect_uri=https%3A%2F%2Fazgives.civicore.com%2Findex.php%3Fsection%3Ddashboards%26action%3Dcondition%26loginModule%3D0%26ssoLogin%3D1&state=64d55bea564fe&nonce=64d55bea564ff&config_token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwczpcL1wvYXpnaXZlcy5jaXZpY29yZS5jb20iLCJpYXQiOjE2OTE3MDQyOTgsImV4cCI6MTY5MTcwNzg5OCwicHJvZHVjdF9icmFuZF9pZCI6IjEyIiwiaG9zdHMiOiJhemdpdmVzLmNpdmljb3JlLmNvbSJ9.uCQrNKOfZD_AvjvYDotRUrNcF4O9OzBE89JeCbkcG0c", TextToDisplay:="AZ Gives Donation Website Link"
+        ' Benevity
+            wsSelectionPage.Hyperlinks.Add Anchor:=wsSelectionPage.Range("D6"), Address:="https://causes.benevity.org/user?hsCtaTracking=70669402-b761-4e69-b77b-ffe82c79f012%7C2d2019f4-8678-4187-a2bb-d36e5b1095ca", TextToDisplay:="Benevity Donation Website Link"
+            wsSelectionPage.Hyperlinks.Add Anchor:=wsSelectionPage.Range("D7"), Address:="https://causes.benevity.org/user?hsCtaTracking=70669402-b761-4e69-b77b-ffe82c79f012%7C2d2019f4-8678-4187-a2bb-d36e5b1095ca", TextToDisplay:="Benevity Donation Website Link"
+        ' Big Gives/ Bonterra Tech/ Give Gab
+            wsSelectionPage.Hyperlinks.Add Anchor:=wsSelectionPage.Range("D8"), Address:="https://www.givegab.com/users/sign_in", TextToDisplay:="Big Gives/Bonterra Tech/Give Gab Donation Website Link"
+            wsSelectionPage.Hyperlinks.Add Anchor:=wsSelectionPage.Range("D9"), Address:="https://www.givegab.com/users/sign_in", TextToDisplay:="Big Gives/Bonterra Tech/Give Gab Donation Website Link"
+        ' Click and Pledge
+            wsSelectionPage.Hyperlinks.Add Anchor:=wsSelectionPage.Range("D10"), Address:="https://login.connect.clickandpledge.com/", TextToDisplay:="Click and Pledge Donation Website Link"
+            wsSelectionPage.Hyperlinks.Add Anchor:=wsSelectionPage.Range("D11"), Address:="https://login.connect.clickandpledge.com/", TextToDisplay:="Click and Pledge Donation Website Link"
+        ' Cyber Grants
+            wsSelectionPage.Hyperlinks.Add Anchor:=wsSelectionPage.Range("D12"), Address:="https://www.cybergrants.com/pls/cybergrants/ao_login.login?x_gm_id=1&x_style_id=&x_proposal_type_id=9019", TextToDisplay:="Cyber Grants Donation Website Link"
+            wsSelectionPage.Hyperlinks.Add Anchor:=wsSelectionPage.Range("D13"), Address:="https://www.cybergrants.com/pls/cybergrants/ao_login.login?x_gm_id=1&x_style_id=&x_proposal_type_id=9019", TextToDisplay:="Cyber Grants Donation Website Link"
+        ' Fidelity Giving
+            wsSelectionPage.Hyperlinks.Add Anchor:=wsSelectionPage.Range("D14"), Address:="https://connect.stripe.com/express_login", TextToDisplay:="Fidelity Giving Donation Website Link"
+            wsSelectionPage.Hyperlinks.Add Anchor:=wsSelectionPage.Range("D15"), Address:="https://connect.stripe.com/express_login", TextToDisplay:="Fidelity Giving Donation Website Link"
+        ' Front Stream
+            wsSelectionPage.Hyperlinks.Add Anchor:=wsSelectionPage.Range("D16"), Address:="https://connect.frontstream.com/Login", TextToDisplay:="Front Stream Donation Website Link"
+            wsSelectionPage.Hyperlinks.Add Anchor:=wsSelectionPage.Range("D17"), Address:="https://connect.frontstream.com/Login", TextToDisplay:="Front Stream Donation Website Link"
+        ' NTX Giving Day
+            wsSelectionPage.Hyperlinks.Add Anchor:=wsSelectionPage.Range("D18"), Address:="https://www.northtexasgivingday.org/login?redirectUrl=/giving-events/ntx23", TextToDisplay:="NTX Giving Donation Website Link"
+            wsSelectionPage.Hyperlinks.Add Anchor:=wsSelectionPage.Range("D19"), Address:="https://www.northtexasgivingday.org/login?redirectUrl=/giving-events/ntx23", TextToDisplay:="NTX Giving Donation Website Link"
+        ' Your Cause
+            wsSelectionPage.Hyperlinks.Add Anchor:=wsSelectionPage.Range("D20"), Address:="https://nonprofit.yourcause.com/login", TextToDisplay:="Your Cause Donation Website Link"
+            wsSelectionPage.Hyperlinks.Add Anchor:=wsSelectionPage.Range("D21"), Address:="https://nonprofit.yourcause.com/login", TextToDisplay:="Your Cause Donation Website Link"
+            
+        
+    
+    ' Step 12: Populate Column E with Salesforce Report Link
+        ' 225 Gives
+            wsSelectionPage.Hyperlinks.Add Anchor:=wsSelectionPage.Range("E2"), Address:=SFReport_ManualImports, TextToDisplay:="SF 'Manual Imports' Report Link"
+            wsSelectionPage.Hyperlinks.Add Anchor:=wsSelectionPage.Range("E3"), Address:=SFReport_ManualImports, TextToDisplay:="SF 'Manual Imports' Report Link"
+        ' AZ Gives
+            wsSelectionPage.Hyperlinks.Add Anchor:=wsSelectionPage.Range("E4"), Address:=SFReport_ManualImports, TextToDisplay:="SF 'Manual Imports' Report Link"
+            wsSelectionPage.Hyperlinks.Add Anchor:=wsSelectionPage.Range("E5"), Address:=SFReport_ManualImports, TextToDisplay:="SF 'Manual Imports' Report Link"
+        ' Benevity
+            wsSelectionPage.Hyperlinks.Add Anchor:=wsSelectionPage.Range("E6"), Address:=SFReport_ManualImports, TextToDisplay:="SF 'Manual Imports' Report Link"
+            wsSelectionPage.Hyperlinks.Add Anchor:=wsSelectionPage.Range("E7"), Address:=SFReport_ManualImports, TextToDisplay:="SF 'Manual Imports' Report Link"
+        ' Big Gives/ Bonterra Tech/ Give Gab
+            wsSelectionPage.Hyperlinks.Add Anchor:=wsSelectionPage.Range("E8"), Address:=SFReport_ManualImports, TextToDisplay:="SF 'Manual Imports' Report Link"
+            wsSelectionPage.Hyperlinks.Add Anchor:=wsSelectionPage.Range("E9"), Address:=SFReport_ManualImports, TextToDisplay:="SF 'Manual Imports' Report Link"
+        ' Click and Pledge
+            wsSelectionPage.Hyperlinks.Add Anchor:=wsSelectionPage.Range("E10"), Address:=SFReport_ClickandPledge, TextToDisplay:="SF Click and Pledge Report Link"
+            wsSelectionPage.Hyperlinks.Add Anchor:=wsSelectionPage.Range("E11"), Address:=SFReport_ClickandPledge, TextToDisplay:="SF Click and Pledge Report Link"
+        ' Cyber Grants
+            wsSelectionPage.Hyperlinks.Add Anchor:=wsSelectionPage.Range("E12"), Address:=SFReport_ManualImports, TextToDisplay:="SF 'Manual Imports' Report Link"
+            wsSelectionPage.Hyperlinks.Add Anchor:=wsSelectionPage.Range("E13"), Address:=SFReport_ManualImports, TextToDisplay:="SF 'Manual Imports' Report Link"
+        ' Fidelity Giving
+            wsSelectionPage.Hyperlinks.Add Anchor:=wsSelectionPage.Range("E14"), Address:=SFReport_ManualImports, TextToDisplay:="SF 'Manual Imports' Report Link"
+            wsSelectionPage.Hyperlinks.Add Anchor:=wsSelectionPage.Range("E15"), Address:=SFReport_ManualImports, TextToDisplay:="SF 'Manual Imports' Report Link"
+        ' Front Stream
+            wsSelectionPage.Hyperlinks.Add Anchor:=wsSelectionPage.Range("E16"), Address:=SFReport_ManualImports, TextToDisplay:="SF 'Manual Imports' Report Link"
+            wsSelectionPage.Hyperlinks.Add Anchor:=wsSelectionPage.Range("E17"), Address:=SFReport_ManualImports, TextToDisplay:="SF 'Manual Imports' Report Link"
+        ' NTX Giving Day
+            wsSelectionPage.Hyperlinks.Add Anchor:=wsSelectionPage.Range("E18"), Address:=SFReport_ManualImports, TextToDisplay:="SF 'Manual Imports' Report Link"
+            wsSelectionPage.Hyperlinks.Add Anchor:=wsSelectionPage.Range("E19"), Address:=SFReport_ManualImports, TextToDisplay:="SF 'Manual Imports' Report Link"
+        ' Your Cause
+            wsSelectionPage.Hyperlinks.Add Anchor:=wsSelectionPage.Range("E20"), Address:=SFReport_ManualImports, TextToDisplay:="SF 'Manual Imports' Report Link"
+            wsSelectionPage.Hyperlinks.Add Anchor:=wsSelectionPage.Range("E21"), Address:=SFReport_ManualImports, TextToDisplay:="SF 'Manual Imports' Report Link"
+            
+    
+    ' Step 13: Populate Column F with the Converter's intended use.
+        wsSelectionPage.Range("F2").value = ""
+        wsSelectionPage.Range("F3").value = "This macro is meant to streamline the process of consolidating and converting the '225 Gives' Reports into a Salesforce Import File."
+        wsSelectionPage.Range("F4").value = ""
+        wsSelectionPage.Range("F5").value = "This macro is meant to streamline the process of converting the 'AZ Gives' Report into a Salesforce Import File."
+        wsSelectionPage.Range("F6").value = ""
+        wsSelectionPage.Range("F7").value = "This macro is meant to streamline the process of consolidating and converting the 'Benevity' Reports into a Salesforce Import File. It also renames the Files' Names appropriately."
+        wsSelectionPage.Range("F8").value = ""
+        wsSelectionPage.Range("F9").value = "This macro is meant to streamline the process of converting the 'Big Gives/Bonterra Tech/Give Gab' Report into a Salesforce Import File."
+        wsSelectionPage.Range("F10").value = ""
+        wsSelectionPage.Range("F11").value = ""
+        wsSelectionPage.Range("F12").value = ""
+        wsSelectionPage.Range("F13").value = "This macro is meant to streamline the process of consolidating and converting the 'Cyber Grants' Reports into a Salesforce Import File. It also renames the Files' Names appropriately."
+        wsSelectionPage.Range("F14").value = ""
+        wsSelectionPage.Range("F15").value = "This macro is meant to streamline the process of converting the 'Fidelity Gifts' Report into a Salesforce Import File."
+        wsSelectionPage.Range("F16").value = ""
+        wsSelectionPage.Range("F17").value = "This macro is meant to streamline the process of consolidating and converting the 'Front Stream' Reports into a Salesforce Import File. It also renames the Files' Names appropriately."
+        wsSelectionPage.Range("F18").value = ""
+        wsSelectionPage.Range("F19").value = "This macro is meant to streamline the process of consolidating and converting the 'NTX Giving Day' Reports into a Salesforce Import File. It also renames the Files' Names appropriately."
+        wsSelectionPage.Range("F20").value = ""
+        wsSelectionPage.Range("F21").value = "This macro is meant to streamline the process of consolidating and converting the 'Your Cause' Reports into a Salesforce Import File. It also renames the Files' Names appropriately."
+        
+    
+    ' Step 14: Set the Size of Columns and Rows A2 through E40
+        wsSelectionPage.Range("A:A").ColumnWidth = 80
+        wsSelectionPage.Range("B:F").Columns.AutoFit
+        wsSelectionPage.Rows("1:1").RowHeight = 18#
+        wsSelectionPage.Rows("2:40").RowHeight = 30#
+        wsSelectionPage.Cells.Interior.Color = RGB(0, 0, 0)
+        wsSelectionPage.Cells.Font.Color = RGB(255, 255, 255)
+        
+        
+    ' Step 15: Create the buttons for each of the converters.
+    
+        ' Step 15.1: 225 Gives
+            ' AR Team's Macro
+                Set AR_225Gives = ActiveSheet.Buttons.Add(0, 19, 375, 29.5)
+                With AR_225Gives
+                    .Caption = "Click here to run the 'AR' 225 Gives Macro"
+                    .OnAction = "BBR_225Gives.AR_225Gives_Part1"
+                    .Font.Size = 15
+                    .Font.Bold = True
+                    .Font.Color = RGB(0, 175, 0)
+                End With
+            ' SF Team's Macro
+                Set SF_225Gives = ActiveSheet.Buttons.Add(0, 49, 375, 29.5)
+                With SF_225Gives
+                    .Caption = "Click here to run the 'SF' 225 Gives Macro"
+                    .OnAction = "BBR_225Gives.SF_225Gives"
+                    .Font.Size = 15
+                    .Font.Bold = True
+                    .Font.Color = RGB(0, 130, 225)
+                End With
+                
+        ' Step 15.2: AZ Gives
+            ' AR Team's Macro
+                Set AR_AZGives = ActiveSheet.Buttons.Add(0, 79, 375, 29.5)
+                With AR_AZGives
+                    .Caption = "Click here to run the 'AR' AZ Gives Macro"
+                    .OnAction = "AZGives.AZGives_AR_Part1"
+                    .Font.Size = 15
+                    .Font.Bold = True
+                    .Font.Color = RGB(0, 175, 0)
+                End With
+            ' SF Team's Macro
+                Set SF_AZGives = ActiveSheet.Buttons.Add(0, 109, 375, 29.5)
+                With SF_AZGives
+                    .Caption = "Click here to run the 'SF' AZ Gives Macro"
+                    .OnAction = "AZGives.AZGives_SF"
+                    .Font.Size = 15
+                    .Font.Bold = True
+                    .Font.Color = RGB(0, 130, 225)
+                End With
+        
+        ' Step 15.3: Benevity
+            ' AR Team's Macro
+                Set AR_Benevity = ActiveSheet.Buttons.Add(0, 139, 375, 29.5)
+                With AR_Benevity
+                    .Caption = "Click here to run the 'AR' Benevity Macro"
+                    .OnAction = "Benevity.Benevity_AR_Part1"
+                    .Font.Size = 15
+                    .Font.Bold = True
+                    .Font.Color = RGB(0, 175, 0)
+                End With
+            ' SF Team's Macro
+                Set SF_Benevity = ActiveSheet.Buttons.Add(0, 169, 375, 29.5)
+                With SF_Benevity
+                    .Caption = "Click here to run the 'SF' Benevity Macro"
+                    .OnAction = "Benevity.Benevity_SF_Part1"
+                    .Font.Size = 15
+                    .Font.Bold = True
+                    .Font.Color = RGB(0, 130, 225)
+                End With
+                
+        ' Step 15.4: Big Gives/Bonterra Tech/ Give Gab
+            ' AR Team's Macro
+                Set AR_BigGives = ActiveSheet.Buttons.Add(0, 199, 375, 29.5)
+                With AR_BigGives
+                    .Caption = "Click here to run the 'AR' Give Gab Macro"
+                    .OnAction = "BigGive_GiveGab_BonterraTech.GiveGab_AR_Part1"
+                    .Font.Size = 15
+                    .Font.Bold = True
+                    .Font.Color = RGB(0, 175, 0)
+                End With
+            ' SF Team's Macro
+                Set SF_BigGives = ActiveSheet.Buttons.Add(0, 229, 375, 29.5)
+                With SF_BigGives
+                    .Caption = "Click here to run the 'SF' Give Gab Macro"
+                    .OnAction = "BigGive_GiveGab_BonterraTech.GiveGab_SF"
+                    .Font.Size = 15
+                    .Font.Bold = True
+                    .Font.Color = RGB(0, 130, 225)
+                End With
+        
+        ' Step 15.5: Click & Pledge
+            ' AR Team's Macro
+                Set AR_ClickAndPledge = ActiveSheet.Buttons.Add(0, 259, 375, 29.5)
+                With AR_ClickAndPledge
+                    .Caption = "Click here to run the 'AR' Monthly Click and Pledge Macro"
+                    .OnAction = "Click_and_Pledge.Click_and_Pledge_Monthly_AR_Part1"
+                    .Font.Size = 15
+                    .Font.Bold = True
+                    .Font.Color = RGB(0, 175, 0)
+                End With
+            ' SF Team's Macro Does Not Exist
+                With wsSelectionPage.Range("A11")
+                    .value = "''SF' Click and Pledge Macro does not exist"
+                    .Font.Bold = True
+                    .Font.Size = 15
+                End With
+                
+        ' Step 15.6: Cyber Grants
+            ' AR Team's Macro
+                Set AR_CyberGrants = ActiveSheet.Buttons.Add(0, 319, 375, 29.5)
+                With AR_CyberGrants
+                    .Caption = "Click here to run the 'AR' Cyber Grants Macro"
+                    .OnAction = "CyberGrants.CyberGrants_AR_Part1"
+                    .Font.Size = 15
+                    .Font.Bold = True
+                    .Font.Color = RGB(0, 175, 0)
+                End With
+            ' SF Team's Macro
+                Set SF_CyberGrants = ActiveSheet.Buttons.Add(0, 349, 375, 29.5)
+                With SF_CyberGrants
+                    .Caption = "Click here to run the 'SF' Cyber Grants Macro"
+                    .OnAction = "CyberGrants.CyberGrants_SF_Part1"
+                    .Font.Size = 15
+                    .Font.Bold = True
+                    .Font.Color = RGB(0, 130, 225)
+                End With
+                
+        ' Step 15.7: Fidelity Gifts
+            ' AR Team's Macro
+                Set AR_FidelityGifts = ActiveSheet.Buttons.Add(0, 379, 375, 29.5)
+                With AR_FidelityGifts
+                    .Caption = "Click here to run the 'AR' Fidelity Gifts Macro"
+                    .OnAction = "Fidelity.Fidelity_AR_Part1"
+                    .Font.Size = 15
+                    .Font.Bold = True
+                    .Font.Color = RGB(0, 175, 0)
+                End With
+            ' SF Team's Macro
+                Set SF_FidelityGifts = ActiveSheet.Buttons.Add(0, 409, 375, 29.5)
+                With SF_FidelityGifts
+                    .Caption = "Click here to run the 'SF' Fidelity Gifts Macro"
+                    .OnAction = "Fidelity.Fidelity_SF"
+                    .Font.Size = 15
+                    .Font.Bold = True
+                    .Font.Color = RGB(0, 130, 225)
+                End With
+                
+        ' Step 15.8: Front Stream
+            ' AR Team's Macro
+                Set AR_FrontStream = ActiveSheet.Buttons.Add(0, 439, 375, 29.5)
+                With AR_FrontStream
+                    .Caption = "Click here to run the 'AR' Front Stream Macro"
+                    .OnAction = "FrontStream.FrontStream_AR_Part1"
+                    .Font.Size = 15
+                    .Font.Bold = True
+                    .Font.Color = RGB(0, 175, 0)
+                End With
+            ' SF Team's Macro
+                Set SF_FrontStream = ActiveSheet.Buttons.Add(0, 469, 375, 29.5)
+                With SF_FrontStream
+                    .Caption = "Click here to run the 'SF' Front Stream Macro"
+                    .OnAction = "FrontStream.FrontStream_SF"
+                    .Font.Size = 15
+                    .Font.Bold = True
+                    .Font.Color = RGB(0, 130, 225)
+                End With
+        
+        ' Step 15.9: NTX Giving Day
+            ' AR Team's Macro
+                Set AR_NTXGiving = ActiveSheet.Buttons.Add(0, 499, 375, 29.5)
+                With AR_NTXGiving
+                    .Caption = "Click here to run the 'AR' NTX Giving Day Macro"
+                    .OnAction = "NTXGiving.NTXGiving_AR_Part1"
+                    .Font.Size = 15
+                    .Font.Bold = True
+                    .Font.Color = RGB(0, 175, 0)
+                End With
+            ' SF Team's Macro
+                Set SF_NTXGiving = ActiveSheet.Buttons.Add(0, 529, 375, 29.5)
+                With SF_NTXGiving
+                    .Caption = "Click here to run the 'SF' NTX Giving Day Macro"
+                    .OnAction = "NTXGiving.NTXGiving_SF"
+                    .Font.Size = 15
+                    .Font.Bold = True
+                    .Font.Color = RGB(0, 130, 225)
+                End With
+        
+        ' Step 15.10: Your Cause
+            ' AR Team's Macro
+                Set AR_YourCause = ActiveSheet.Buttons.Add(0, 559, 375, 29.5)
+                With AR_YourCause
+                    .Caption = "Click here to run the 'AR' Your Cause Macro"
+                    .OnAction = "YourCause.YourCause_AR_Part1"
+                    .Font.Size = 15
+                    .Font.Bold = True
+                    .Font.Color = RGB(0, 175, 0)
+                End With
+            ' SF Team's Macro
+                Set SF_YourCause = ActiveSheet.Buttons.Add(0, 589, 375, 29.5)
+                With SF_YourCause
+                    .Caption = "Click here to run the 'SF' Your Cause Macro"
+                    .OnAction = "YourCause.YourCause_SF"
+                    .Font.Size = 15
+                    .Font.Bold = True
+                    .Font.Color = RGB(0, 130, 225)
+                End With
+                
+        Application.Calculation = xlAutomatic
+
+
+End Sub
+
+
